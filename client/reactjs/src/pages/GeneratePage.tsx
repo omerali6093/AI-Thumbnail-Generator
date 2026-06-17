@@ -44,6 +44,26 @@ function GeneratePage() {
                                             <span className="text-xs text-zinc-400">{title.length}/100</span>
                                         </div>
                                     </div>
+
+                                    {/* AspectRatioSelector */}
+                                    {/* StyleSelector */}
+                                    {/* ColorSchemeSelector */}
+
+                                    {/* DETAILS */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium">
+                                            Additional Prompts <span className="text-xs text-zinc-400">(optional)</span>
+                                        </label>
+                                        <textarea 
+                                        value={additionalDetails} 
+                                        onChange={(e) => setAdditionalDetails(e.target.value)}
+                                        rows={3}
+                                        placeholder="Add any specific elements, mood, or style preferences...."
+                                        className="w-full px-4 py-3 rounded-lg border border-white/10 bg-whitet/6 
+                                        text-zinc-100 placeholder:text-zinc-400 focus:outline-none
+                                        focus:ring-2 focus:ring-pink-500 resize-none"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* BUTTON */}
