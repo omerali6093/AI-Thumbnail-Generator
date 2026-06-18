@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
-import type { IThumbnail } from "../assets/assets";
+import { colorSchemes, type AspectRatio, type IThumbnail, type ThumbnailStyle } from "../assets/assets";
 import SoftBackDrop from "../components/SoftBackDrop";
+import AspectRatioSelector from "../components/AspectRatioSelector";
 
 
 function GeneratePage() {
@@ -11,6 +12,11 @@ function GeneratePage() {
     const [additionalDetails, setAdditionalDetails] = useState('')
     const [thumbnail, setThumbnail] = useState<IThumbnail | null>(null);
     const [loading, setLoading] = useState(false)
+
+    const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9")
+    const [colorSchemeId, setColorSchemeId] = useState<string>(colorSchemes[0].id)
+    const [style, setStyle] = useState<ThumbnailStyle>("Bold & Graphic")
+    const [styleDropDown, setstyleDropDown] = useState(false)
 
     console.log(title)
 
@@ -46,6 +52,10 @@ function GeneratePage() {
                                     </div>
 
                                     {/* AspectRatioSelector */}
+                                    <AspectRatioSelector 
+                                    value={aspectRatio}
+                                    onChange={setAspectRatio}
+                                    />
                                     {/* StyleSelector */}
                                     {/* ColorSchemeSelector */}
 
