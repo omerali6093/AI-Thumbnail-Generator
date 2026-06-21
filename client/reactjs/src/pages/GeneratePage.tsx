@@ -4,6 +4,7 @@ import { colorSchemes, type AspectRatio, type IThumbnail, type ThumbnailStyle } 
 import SoftBackDrop from "../components/SoftBackDrop";
 import AspectRatioSelector from "../components/AspectRatioSelector";
 import StyleSelector from "../components/StyleSelector";
+import ColorSchemeSelector from "../components/ColorSchemeSelector";
 
 
 function GeneratePage() {
@@ -68,6 +69,9 @@ function GeneratePage() {
 
 
                                     {/* ColorSchemeSelector */}
+                                    <ColorSchemeSelector 
+                                    value={colorSchemeId}
+                                    onChange={setColorSchemeId}/>
 
                                     {/* DETAILS */}
                                     <div className="space-y-2">
