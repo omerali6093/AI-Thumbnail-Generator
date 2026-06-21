@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import { colorSchemes, type AspectRatio, type IThumbnail, type ThumbnailStyle } from "../assets/assets";
 import SoftBackDrop from "../components/SoftBackDrop";
 import AspectRatioSelector from "../components/AspectRatioSelector";
+import StyleSelector from "../components/StyleSelector";
 
 
 function GeneratePage() {
@@ -56,7 +57,16 @@ function GeneratePage() {
                                     value={aspectRatio}
                                     onChange={setAspectRatio}
                                     />
+
                                     {/* StyleSelector */}
+                                    <StyleSelector 
+                                    value={style}
+                                    onChange={setStyle}
+                                    isOpen={styleDropDown}
+                                    setIsOpen={setstyleDropDown}
+                                    />
+
+
                                     {/* ColorSchemeSelector */}
 
                                     {/* DETAILS */}
