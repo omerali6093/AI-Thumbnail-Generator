@@ -1,8 +1,16 @@
 import "dotenv/config";
 import express, { Request, Response } from 'express';
 import cors from "cors"
+import connectDB from "./configs/db.js";
+import dns from 'dns'
+dns.setServers(["1.1.1.1", "8.8.8.8"])
+
+await connectDB()
+
+
 
 const app = express();
+
 
 // Middleware
 app.use(cors())
