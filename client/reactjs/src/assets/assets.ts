@@ -77,7 +77,7 @@ export const dummyThumbnails = [
     {
         _id: "69451d5bc9ea67e4c930f698",
         userId: "6942b3bd2a93a220baa331b3",
-        title: "Learn How to make 100k in 10 days",
+        title: "Learow to make 100k in 10 daysn H",
         style: "Bold & Graphic",
         aspect_ratio: "16:9",
         color_scheme: "vibrant",

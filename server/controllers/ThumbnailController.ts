@@ -2,9 +2,7 @@ import { Request, Response } from 'express'
 import Thumbnail from '../models/Thumbnail.js';
 import path from 'path';
 import fs from "fs";
-// import cloudinary from '../configs/cloudinary.js';
-import { v2 as cloudinary } from 'cloudinary';
-
+import supabase from '../configs/supabase.js';
 
 const stylePrompts = {
     'Bold & Graphic': 'eye-catching thumbnail, bold typography, vibrant colors, expressive facial reaction, dramatic lighting, high contrast, click-worthy composition, professional style',
@@ -49,8 +47,6 @@ export const generateThumbnail = async (req: Request, res: Response) => {
             isGenerating: true,
         })
 
-
-
         let prompt = `Create a  ${stylePrompts[style as keyof typeof stylePrompts]} for: "${title}"`;
 
         if (color_scheme) {
@@ -65,7 +61,6 @@ export const generateThumbnail = async (req: Request, res: Response) => {
         Make it bold, professional, and impossible to ignore.`
 
 
-
         const response = await fetch(process.env.CLOUDFLARE_IMAGE_API!, {
             method: "POST",
             headers: {
@@ -75,20 +70,15 @@ export const generateThumbnail = async (req: Request, res: Response) => {
             body: JSON.stringify({ prompt }),
         });
 
-        console.log("Image Api url:", process.env.CLOUDFLARE_IMAGE_API);
-        console.log("API key:", process.env.CLOUDFLARE_API_KEY)
-
         if (!response.ok) {
             const text = await response.text();
             console.log("Cloudflare Error:", text);
             throw new Error(text);
         }
 
-
         // Convert image to Buffer
         const arrayBuffer = await response.arrayBuffer();
         const finalBuffer = Buffer.from(arrayBuffer);
-
 
         const fileName = `thumbnail-${Date.now()}.png`;
         const filePath = path.join("images", fileName);
@@ -98,18 +88,21 @@ export const generateThumbnail = async (req: Request, res: Response) => {
         // Write the final image to the file 
         fs.writeFileSync(filePath, finalBuffer!);
 
-        console.log(cloudinary.config());
-
-
-        const uploadResult = await cloudinary.uploader.upload(filePath, {
-            resource_type: "image",
+        const { data } = await supabase.storage
+            .from("thumblify")
+            .upload(fileName, finalBuffer, {
+                contentType: "image/png",
         });
 
-        thumbnail.image_url = uploadResult.url;
-        thumbnail.isGenerating = false;
+        const { 
+            data: { publicUrl },
+        } = supabase.storage.
+        from("thumblify").
+        getPublicUrl(fileName);
 
+        thumbnail.image_url = publicUrl;
+        thumbnail.isGenerating = false;
         await thumbnail.save();
-        console.log(uploadResult);
 
         res.json({ message: "Thumbnail Generated", thumbnail })
 
