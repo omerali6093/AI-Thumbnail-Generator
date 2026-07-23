@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import SoftBackDrop from "../components/SoftBackDrop"
-import { dummyThumbnails, type IThumbnail } from "../assets/assets"
+import { type IThumbnail } from "../assets/assets"
 import { Link, useNavigate } from "react-router-dom"
 import { ArrowUpRightIcon, DownloadIcon, TrashIcon } from "lucide-react"
+import api from "../configs/api"
+import toast from "react-hot-toast"
 
 
 function MyGeneration() {
@@ -19,8 +21,16 @@ function MyGeneration() {
     const [loading, setLoading] = useState(false)
 
     const fetchThumbnails = async () => {
-        setThumbnails(dummyThumbnails as unknown as IThumbnail[])
-        setLoading(false)
+        try {
+            setLoading(true)
+            const { data } = await api.get("/api/user/thumbnails")
+            setThumbnails(data?.thumbnails || data?.thumbnail || data?.thumnail || [])
+        } catch (error: any) {
+            console.log(error)
+            toast.error(error?.response?.data?.message || error.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleDownload = (image_url : string) => {
@@ -28,7 +38,13 @@ function MyGeneration() {
     }
 
     const handleDelete = async (id: string) => {
-        console.log(id)
+        try {
+            const { data } = await api.delete(`/api/thumbnail/delete/${id}`);
+            toast.success(data?.message || "Thumbnail deleted");
+            fetchThumbnails();
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || error.message);
+        }
     }
 
     useEffect(() => {

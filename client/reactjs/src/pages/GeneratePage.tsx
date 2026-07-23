@@ -58,19 +58,19 @@ function GeneratePage() {
     const fetchThumbnail = async () => {
         try {
             const { data } = await api.get(`/api/user/thumbnail/${id}`);
-            setThumbnail(data?.thumbnail as IThumbnail);
-            setLoading(!data?.thumbnail?.image_url);
-            setAdditionalDetails(data?.thumbnail?.user_prompt ?? "");
-            setTitle(data?.thumbnail?.title ?? "");
-            setColorSchemeId(data?.thumbnail?.color_scheme ?? colorSchemes[0].id);
-            setAspectRatio(data?.thumbnail?.aspect_ratio ?? "16:9");
-            setStyle(data?.thumbnail?.style ?? "Bold & Graphic");
-
-            console.log(data.thumbnail);
-
+            const thumb = data?.thumbnail || data?.thumnail;
+            if (thumb) {
+                setThumbnail(thumb as IThumbnail);
+                setLoading(!thumb?.image_url);
+                setAdditionalDetails(thumb?.user_prompt ?? "");
+                setTitle(thumb?.title ?? "");
+                setColorSchemeId(thumb?.color_scheme ?? colorSchemes[0].id);
+                setAspectRatio(thumb?.aspect_ratio ?? "16:9");
+                setStyle(thumb?.style ?? "Bold & Graphic");
+            }
         } catch (error: any) {
             console.log(error);
-            toast.error(error?.response?.data?.message || error.messsage)
+            toast.error(error?.response?.data?.message || error.message);
         }
     }
 

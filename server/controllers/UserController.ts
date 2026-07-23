@@ -7,8 +7,8 @@ export const getUsersThumbnails = async (req: Request, res: Response) => {
 
         const {userId} = req.session; 
 
-        const thumnail = await Thumbnail.find({userId}).sort({createdAt: -1})
-        res.json({thumnail})
+        const thumbnails = await Thumbnail.find({userId}).sort({createdAt: -1})
+        res.json({thumbnails})
 
     } catch (error: any) {
         console.log(error)
@@ -23,8 +23,8 @@ export const getSingleUserThumbnail = async (req: Request, res: Response) => {
         const { userId } = req.session; 
         const { id } = req.params;
 
-        const thumnail = await Thumbnail.findOne({ userId , _id: id })
-        res.json({thumnail})
+        const thumbnail = await Thumbnail.findOne({ userId , _id: id })
+        res.json({thumbnail})
 
     } catch (error: any) {
         console.log(error)

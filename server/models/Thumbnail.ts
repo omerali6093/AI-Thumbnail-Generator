@@ -32,7 +32,8 @@ const ThumbnailSchema = new mongoose.Schema<IThumbanil>(
         prompt_used: {type: String},
         user_prompt: {type: String},
         isGenerating: {type: Boolean, default: true}
-    }
+    },
+    { timestamps: true }
 )
 
 const Thumbnail = mongoose.models.Thumbnail || mongoose.model<IThumbanil>("Thumbnail", ThumbnailSchema);
