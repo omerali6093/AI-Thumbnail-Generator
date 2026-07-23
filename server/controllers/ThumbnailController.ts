@@ -99,15 +99,15 @@ export const generateThumbnail = async (req: Request, res: Response) => {
         } = supabase.storage.
         from("thumblify").
         getPublicUrl(fileName);
-
+        
         thumbnail.image_url = publicUrl;
         thumbnail.isGenerating = false;
         await thumbnail.save();
-
-        res.json({ message: "Thumbnail Generated", thumbnail })
-
+        
+        
         // remove image file from disk
         fs.unlinkSync(filePath)
+        res.json({ message: "Thumbnail Generated", thumbnail })
 
     } catch (error: any) {
         console.log(error)

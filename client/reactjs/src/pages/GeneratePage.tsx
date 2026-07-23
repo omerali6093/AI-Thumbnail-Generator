@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { colorSchemes, dummyThumbnails, type AspectRatio, type IThumbnail, type ThumbnailStyle } from "../assets/assets";
+import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { colorSchemes, type AspectRatio, type IThumbnail, type ThumbnailStyle } from "../assets/assets";
 import SoftBackDrop from "../components/SoftBackDrop";
 import AspectRatioSelector from "../components/AspectRatioSelector";
 import StyleSelector from "../components/StyleSelector";
 import ColorSchemeSelector from "../components/ColorSchemeSelector";
 import PreviewPanel from "../components/PreviewPanel";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
+import api from "../configs/api";
 
 
 function GeneratePage() {
 
     const { id } = useParams();
+    const { pathname } = useLocation()
+    const navigate = useNavigate()
+    const { isLoggedIn } = useAuth()
+
     const [title, setTitle] = useState("");
     const [additionalDetails, setAdditionalDetails] = useState('')
     const [thumbnail, setThumbnail] = useState<IThumbnail | null>(null);
@@ -22,31 +29,69 @@ function GeneratePage() {
     const [styleDropDown, setstyleDropDown] = useState(false)
 
     const handleGenerate = async () => {
+        try {
+            if (!isLoggedIn) return toast.error("Please login");
+            if (!title.trim()) return toast.error("Title is required");
 
-    }
-    
+            setLoading(true);
+
+            const { data } = await api.post("/api/thumbnail/generate", {
+                title,
+                prompt: additionalDetails,
+                style,
+                aspect_ratio: aspectRatio,
+                color_scheme: colorSchemeId,
+                text_overlay: true,
+            });
+
+            if (data.thumbnail) {
+                navigate("/generate/" + data.thumbnail._id);
+                toast.success(data.message);
+            }
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const fetchThumbnail = async () => {
-        if(id) {
-            const thumbnail : any = dummyThumbnails.find((thumbnail) => thumbnail._id === id);
-            setThumbnail(thumbnail)
-            setAdditionalDetails(thumbnail.user_prompt)
-            setTitle(thumbnail.title)
-            setColorSchemeId(thumbnail.color_scheme)
-            setAspectRatio(thumbnail.aspect_ratio)
-            setStyle(thumbnail.style)
-            setLoading(false)
+        try {
+            const { data } = await api.get(`/api/user/thumbnail/${id}`);
+            setThumbnail(data?.thumbnail as IThumbnail);
+            setLoading(!data?.thumbnail?.image_url);
+            setAdditionalDetails(data?.thumbnail?.user_prompt ?? "");
+            setTitle(data?.thumbnail?.title ?? "");
+            setColorSchemeId(data?.thumbnail?.color_scheme ?? colorSchemes[0].id);
+            setAspectRatio(data?.thumbnail?.aspect_ratio ?? "16:9");
+            setStyle(data?.thumbnail?.style ?? "Bold & Graphic");
+
+            console.log(data.thumbnail);
+
+        } catch (error: any) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || error.messsage)
         }
     }
 
     useEffect(() => {
-        if(id) {
+        if (isLoggedIn && id) {
             fetchThumbnail()
         }
-    }, [id])
+        if (id && loading && isLoggedIn) {
+            const interval = setInterval(() => {
+                fetchThumbnail()
+            }, 5000);
 
+            return () => clearInterval(interval)
+        }
+    }, [id, loading, isLoggedIn])
 
-
-    console.log(title)
+    useEffect(() => {
+        if (!id && thumbnail) {
+            setThumbnail(null)
+        }
+    }, [pathname])
 
     return (
         <>
@@ -66,50 +111,50 @@ function GeneratePage() {
                                     {/* TITLE INPUT */}
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium">Title or Topic</label>
-                                        <input type="text" value={title} 
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        maxLength={100}
-                                        placeholder="e.g, 10 Tips for Better Sleep"
-                                        className="w-full px-4 py-3 rounded-lg border border-white/12 bg-black/20
+                                        <input type="text" value={title ?? ""}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            maxLength={100}
+                                            placeholder="e.g, 10 Tips for Better Sleep"
+                                            className="w-full px-4 py-3 rounded-lg border border-white/12 bg-black/20
                                         text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2
                                         focus:ring-pink-500"
                                         />
-                                        <div className="flex justify-end">
+                                        {/* <div className="flex justify-end">
                                             <span className="text-xs text-zinc-400">{title.length}/100</span>
-                                        </div>
+                                        </div> */}
                                     </div>
 
                                     {/* AspectRatioSelector */}
-                                    <AspectRatioSelector 
-                                    value={aspectRatio}
-                                    onChange={setAspectRatio}
+                                    <AspectRatioSelector
+                                        value={aspectRatio}
+                                        onChange={setAspectRatio}
                                     />
 
                                     {/* StyleSelector */}
-                                    <StyleSelector 
-                                    value={style}
-                                    onChange={setStyle}
-                                    isOpen={styleDropDown}
-                                    setIsOpen={setstyleDropDown}
+                                    <StyleSelector
+                                        value={style}
+                                        onChange={setStyle}
+                                        isOpen={styleDropDown}
+                                        setIsOpen={setstyleDropDown}
                                     />
 
 
                                     {/* ColorSchemeSelector */}
-                                    <ColorSchemeSelector 
-                                    value={colorSchemeId}
-                                    onChange={setColorSchemeId}/>
+                                    <ColorSchemeSelector
+                                        value={colorSchemeId}
+                                        onChange={setColorSchemeId} />
 
                                     {/* DETAILS */}
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium">
                                             Additional Prompts <span className="text-xs text-zinc-400">(optional)</span>
                                         </label>
-                                        <textarea 
-                                        value={additionalDetails} 
-                                        onChange={(e) => setAdditionalDetails(e.target.value)}
-                                        rows={3}
-                                        placeholder="Add any specific elements, mood, or style preferences...."
-                                        className="w-full px-4 py-3 rounded-lg border border-white/10 bg-whitet/6 
+                                        <textarea
+                                            value={additionalDetails ?? ""}
+                                            onChange={(e) => setAdditionalDetails(e.target.value)}
+                                            rows={3}
+                                            placeholder="Add any specific elements, mood, or style preferences...."
+                                            className="w-full px-4 py-3 rounded-lg border border-white/10 bg-whitet/6 
                                         text-zinc-100 placeholder:text-zinc-400 focus:outline-none
                                         focus:ring-2 focus:ring-pink-500 resize-none"
                                         />
@@ -131,10 +176,10 @@ function GeneratePage() {
                         <div>
                             <div className="p-6 rounded-2xl bg-white/8 border border-white/10 shadow-xl">
                                 <h2 className="text-lg font-semibold text-zinc-100 mb-4">Preview</h2>
-                                <PreviewPanel 
-                                thumbnail={thumbnail}
-                                isLoading={loading}
-                                aspectRatio={aspectRatio}/>
+                                <PreviewPanel
+                                    thumbnail={thumbnail}
+                                    isLoading={loading}
+                                    aspectRatio={aspectRatio} />
                             </div>
                         </div>
 
